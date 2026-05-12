@@ -24,7 +24,7 @@ export default async function handler(req, res) {
           role: 'user',
           content: [{
             type: 'image',
-            source: { type: 'base64', media_type: 'image/png', data: base64 },
+            source: { type: 'base64', media_type: 'image/jpeg', data: base64 },
           }, {
             type: 'text',
             text: 'Generate 18-20 punny, witty print names for this design, inspired by Lilly Pulitzer, Vineyard Vines, and Boden. Output ONLY a numbered list of names, nothing else.',
