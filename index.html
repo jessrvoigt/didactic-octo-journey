@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Name Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 2rem; color: #2c3e50; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 600; }
+        .header p { font-size: 1.1rem; color: #555; }
+        .apiSetup { background: #fffacd; border: 2px solid #ffd700; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+        .apiSetup h2 { font-size: 1rem; color: #856404; margin-bottom: 0.5rem; }
+        .apiSetup p { color: #856404; font-size: 0.9rem; margin-bottom: 1rem; }
+        .apiSetup a { color: #856404; text-decoration: underline; }
+        .apiInputGroup { display: flex; gap: 10px; }
+        .apiInputGroup input { flex: 1; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; }
+        .apiInputGroup button { padding: 10px 20px; background: #856404; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .apiStatus { color: #856404; font-size: 0.9rem; }
+        .clearKeyBtn { display: block; margin-top: 0.5rem; padding: 6px 12px; background: #d97706; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+        .error { background: #fed7d7; border: 1px solid #fc8181; color: #c53030; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .mainGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .uploadBox { border: 3px dashed #cbd5e0; border-radius: 12px; padding: 3rem 2rem; text-align: center; cursor: pointer; background: #f7fafc; min-height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .uploadBox:hover { border-color: #4299e1; background: #ebf8ff; }
+        .uploadIcon { font-size: 3rem; margin-bottom: 1rem; }
+        .uploadBox h3 { color: #2d3748; font-size: 1.1rem; margin: 0 0 0.5rem 0; }
+        .uploadBox p { color: #718096; font-size: 0.95rem; margin: 0; }
+        .imagePreview { width: 100%; }
+        .imagePreview img { width: 100%; border-radius: 12px; margin-bottom: 1rem; max-height: 300px; object-fit: cover; }
+        .changeBtn { width: 100%; padding: 12px; background: #e2e8f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; color: #2d3748; }
+        .changeBtn:hover { background: #cbd5e0; }
+        .placeholder { display: flex; align-items: center; justify-content: center; min-height: 300px; color: #a0aec0; }
+        .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 1rem; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #4299e1; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .card h2 { font-size: 1.1rem; color: #2d3748; margin: 0 0 1rem 0; font-weight: 600; }
+        .namesList { max-height: 400px; overflow-y: auto; margin-bottom: 1.5rem; }
+        .nameItem { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; }
+        .nameItem:hover { background: #f7fafc; }
+        .nameItem input { margin-right: 12px; width: 18px; height: 18px; cursor: pointer; }
+        .nameItem:has(input:checked) { background: #c6f6d5; border-color: #9ae6b4; }
+        .nameItem span { flex: 1; font-size: 0.95rem; color: #2d3748; }
+        .buttonGroup { display: flex; gap: 10px; }
+        .btnPrimary, .btnSecondary { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btnPrimary { background: #4299e1; color: white; }
+        .btnPrimary:hover { background: #3182ce; }
+        .btnSecondary { background: #e2e8f0; color: #2d3748; }
+        .btnSecondary:hover { background: #cbd5e0; }
+        .generateBtn { width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; background: #4299e1; color: white; }
+        .generateBtn:hover:not(:disabled) { background: #3182ce; }
+        .generateBtn:disabled { background: #cbd5e0; cursor: not-allowed; color: #a0aec0; }
+        @media (max-width: 768px) { .mainGrid { grid-template-columns: 1fr; } .header h1 { font-size: 1.8rem; } .apiInputGroup { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Print Name Generator</h1>
+            <p>Upload a design and get punny names</p>
+        </div>
+
+        <div class="apiSetup">
+            <h2>🔑 Setup</h2>
+            <p>Get API key at <a href="https://console.anthropic.com/keys" target="_blank">console.anthropic.com/keys</a></p>
+            <div id="apiSection"></div>
+        </div>
+
+        <div id="errorBox"></div>
+
+        <div class="mainGrid">
+            <div class="card" id="imageCard"></div>
+            <div class="card" id="resultsCard"></div>
+        </div>
+
+        <button class="generateBtn" id="generateBtn" disabled>Generate names</button>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let preview = null;
+        let savedApiKey = localStorage.getItem('anthropic_api_key') || null;
+        let names = [];
+        let selectedNames = new Set();
+
+        function renderApiSection() {
+            const section = document.getElementById('apiSection');
+            if (savedApiKey) {
+                section.innerHTML = `<div class="apiStatus">✓ API key saved <button class="clearKeyBtn" onclick="clearKey()">Change</button></div>`;
+                document.getElementById('generateBtn').disabled = !selectedFile;
+            } else {
+                section.innerHTML = `<div class="apiInputGroup"><input type="password" id="keyInput" placeholder="sk-ant-..."><button onclick="saveKey()">Save</button></div>`;
+            }
+        }
+
+        window.saveKey = function() {
+            const key = document.getElementById('keyInput').value.trim();
+            if (!key) return showError('Enter API key');
+            if (!key.startsWith('sk-ant-')) return showError('Key must start with sk-ant-');
+            localStorage.setItem('anthropic_api_key', key);
+            savedApiKey = key;
+            renderApiSection();
+        };
+
+        window.clearKey = function() {
+            localStorage.removeItem('anthropic_api_key');
+            savedApiKey = null;
+            renderApiSection();
+        };
+
+        function showError(msg) {
+            document.getElementById('errorBox').innerHTML = `<div class="error">${msg}</div>`;
+            setTimeout(() => { document.getElementById('errorBox').innerHTML = ''; }, 5000);
+        }
+
+        function renderImage() {
+            const card = document.getElementById('imageCard');
+            if (!preview) {
+                card.innerHTML = `<label class="uploadBox" onchange="handleFile(event)"><div class="uploadIcon">📸</div><h3>Click to upload</h3><p>JPG, PNG, WebP, GIF</p><input type="file" accept="image/*" style="display:none;"></label>`;
+            } else {
+                card.innerHTML = `<div class="imagePreview"><img src="${preview}" alt="Design"><label class="changeBtn" onchange="handleFile(event)">Change<input type="file" accept="image/*" style="display:none;"></label></div>`;
+            }
+        }
+
+        window.handleFile = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const max = 2048;
+                    if (w > max || h > max) {
+                        const ratio = Math.min(max / w, max / h);
+                        w *= ratio; h *= ratio;
+                    }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    canvas.toBlob((blob) => {
+                        selectedFile = new File([blob], file.name, { type: 'image/png' });
+                        preview = canvas.toDataURL();
+                        renderImage();
+                        document.getElementById('generateBtn').disabled = !savedApiKey;
+                    }, 'image/png', 0.85);
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        function renderResults() {
+            const card = document.getElementById('resultsCard');
+            const btn = document.getElementById('generateBtn');
+            if (btn.textContent === 'Generating...') {
+                card.innerHTML = `<div class="loading"><div class="spinner"></div><p>Generating... (10-15s)</p></div>`;
+            } else if (names.length > 0) {
+                let html = `<h2>Names (${names.length})</h2><div class="namesList">`;
+                names.forEach((name, i) => {
+                    html += `<label class="nameItem"><input type="checkbox" ${selectedNames.has(i) ? 'checked' : ''} onchange="toggleName(${i})"><span>${name}</span></label>`;
+                });
+                html += `</div><div class="buttonGroup"><button class="btnPrimary" onclick="copyAll()">Copy all</button>${selectedNames.size > 0 ? `<button class="btnSecondary" onclick="copySelected()">Copy (${selectedNames.size})</button>` : ''}</div>`;
+                card.innerHTML = html;
+            } else {
+                card.innerHTML = `<div class="placeholder">Upload and generate</div>`;
+            }
+        }
+
+        window.toggleName = function(i) {
+            if (selectedNames.has(i)) selectedNames.delete(i);
+            else selectedNames.add(i);
+            renderResults();
+        };
+
+        window.copyAll = function() { navigator.clipboard.writeText(names.join('\n')); };
+        window.copySelected = function() {
+            const text = Array.from(selectedNames).sort((a, b) => a - b).map(i => names[i]).join('\n');
+            navigator.clipboard.writeText(text);
+        };
+
+        async function fileToBase64(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.handleGenerate = async function() {
+            if (!selectedFile) return showError('Upload image');
+            if (!savedApiKey) return showError('Save API key');
+
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+            names = [];
+            selectedNames = new Set();
+            renderResults();
+
+            try {
+                const base64 = await fileToBase64(selectedFile);
+                const res = await fetch('/api/claude', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ base64, apiKey: savedApiKey })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'API error');
+                }
+
+                const data = await res.json();
+                const text = data.content.find(b => b.type === 'text').text;
+                names = text.split('\n').map(line => {
+                    const m = line.match(/^\d+[\.\)]\s*(.+?)(?:\s*-.*)?$/);
+                    return m ? m[1].trim() : null;
+                }).filter(n => n && n.length > 0);
+
+                if (names.length === 0) throw new Error('No names generated');
+            } catch (err) {
+                showError(`Error: ${err.message}`);
+            } finally {
+                btn.disabled = !savedApiKey;
+                btn.textContent = 'Generate names';
+                renderResults();
+            }
+        };
+
+        document.getElementById('generateBtn').onclick = handleGenerate;
+        renderApiSection();
+        renderImage();
+        renderResults();
+    </script>
+</body>
+</html>
