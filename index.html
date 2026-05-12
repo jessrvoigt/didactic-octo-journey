@@ -44,13 +44,15 @@
         .nameItem:has(input:checked) { background: #c6f6d5; border-color: #9ae6b4; }
         .nameItem span { flex: 1; font-size: 0.95rem; color: #2d3748; }
         .buttonGroup { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btnPrimary, .btnSecondary, .btnRegenerate { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; min-width: 140px; }
+        .btnPrimary, .btnSecondary, .btnRegenerate, .btnCsv { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; min-width: 120px; }
         .btnPrimary { background: #4299e1; color: white; }
         .btnPrimary:hover { background: #3182ce; }
         .btnSecondary { background: #e2e8f0; color: #2d3748; }
         .btnSecondary:hover { background: #cbd5e0; }
         .btnRegenerate { background: #ec4899; color: white; }
         .btnRegenerate:hover { background: #db2777; }
+        .btnCsv { background: #10b981; color: white; }
+        .btnCsv:hover { background: #059669; }
         .generateBtn { width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; background: #4299e1; color: white; }
         .generateBtn:hover:not(:disabled) { background: #3182ce; }
         .generateBtn:disabled { background: #cbd5e0; cursor: not-allowed; color: #a0aec0; }
@@ -165,7 +167,7 @@
                 names.forEach((name, i) => {
                     html += `<label class="nameItem"><input type="checkbox" ${selectedNames.has(i) ? 'checked' : ''} onchange="toggleName(${i})"><span>${name}</span></label>`;
                 });
-                html += `</div><div class="buttonGroup"><button class="btnPrimary" onclick="copyAll()">Copy all</button>${selectedNames.size > 0 ? `<button class="btnSecondary" onclick="copySelected()">Copy (${selectedNames.size})</button>` : ''}<button class="btnRegenerate" onclick="handleGenerate()">🎲 Regenerate</button></div>`;
+                html += `</div><div class="buttonGroup"><button class="btnPrimary" onclick="copyAll()">Copy all</button>${selectedNames.size > 0 ? `<button class="btnSecondary" onclick="copySelected()">Copy (${selectedNames.size})</button>` : ''}<button class="btnCsv" onclick="exportCsv()">📥 Export CSV</button><button class="btnRegenerate" onclick="handleGenerate()">🎲 Regenerate</button></div>`;
                 card.innerHTML = html;
             } else {
                 card.innerHTML = `<div class="placeholder">Upload and generate</div>`;
@@ -182,6 +184,29 @@
         window.copySelected = function() {
             const text = Array.from(selectedNames).sort((a, b) => a - b).map(i => names[i]).join('\n');
             navigator.clipboard.writeText(text);
+        };
+
+        window.exportCsv = function() {
+            // Build CSV content
+            let csv = 'Name,Selected\n';
+            names.forEach((name, i) => {
+                // Escape quotes in names
+                const escapedName = `"${name.replace(/"/g, '""')}"`;
+                const selected = selectedNames.has(i) ? 'Yes' : 'No';
+                csv += `${escapedName},${selected}\n`;
+            });
+
+            // Create download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const date = new Date().toISOString().split('T')[0];
+            link.download = `print-names-${date}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         };
 
         async function fileToBase64(file) {
