@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
+        max_tokens: 1500,
         temperature: 1,
         messages: [{
           role: 'user',
@@ -28,20 +28,31 @@ export default async function handler(req, res) {
             source: { type: 'base64', media_type: 'image/jpeg', data: base64 },
           }, {
             type: 'text',
-            text: `You are the head namer at Lilly Pulitzer. You name prints with maximum sass, wit, and punniness. Your names should make people SMIRK.
+            text: `You are the head namer at Lilly Pulitzer. You name prints with maximum sass, wit, and punniness.
 
-Look at this design and generate 18-20 names that are:
-- PUN-FORWARD: Wordplay, double meanings, cheeky riffs
+STEP 1: Look at this design carefully. In your head, identify:
+- The specific motifs (what flowers, animals, objects, shapes?)
+- The dominant colors (be specific - "hot pink" not "pink")
+- The mood (tropical, nautical, garden party, beach, cocktail hour?)
+- Any unique details (palm trees, shells, lemons, bows, etc.)
+
+STEP 2: Now generate 18-20 names that are DIRECTLY tied to what you actually see in THIS design. Every name must reference a specific element from the image.
+
+Names should be:
+- PUN-FORWARD: Wordplay, double meanings, cheeky riffs on what's IN the design
 - SASSY: A little flirty, a little ridiculous, very confident
 - LILLY PULITZER ENERGY: Think "Boom Boom," "Sippin' n Trippin'," "Pop the Cork," "Cha Cha Cha"
-- EVOCATIVE: Tied to what's actually in the design (colors, motifs, vibes)
+- SPECIFIC: If there are palm trees, the name should reference palms. If there are pink flamingos, reference flamingos. NOT generic.
 - DRINKABLE: Many should sound like cocktails, parties, or sunny mischief
 
-Examples of the energy I want: "Spritz Happens," "Sandy Cheeks," "Tipsy Tropics," "Reef Wrecked," "Coastal Confessions," "Salty AF," "Knot Your Average"
+Examples of how to tie to imagery:
+- Lemons in design → "Squeeze the Day," "Sour Hour," "Zest in Show"
+- Palm trees → "Frond of You," "Palm Reader," "Stay Palm"
+- Pink/coral → "Pink Slip," "Coral Sass," "Blush Hour"
 
-NO boring florals. NO generic nature names. Make me LAUGH.
+NO generic florals. NO names that could apply to any preppy print. Make every name SPECIFIC to THIS image.
 
-Output ONLY a numbered list. No explanations.`,
+Output ONLY a numbered list of 18-20 names. No explanations, no preamble.`,
           }],
         }],
       }),
