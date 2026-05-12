@@ -134,7 +134,7 @@
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let w = img.width, h = img.height;
-                    const max = 2048;
+                    const max = 1024;
                     if (w > max || h > max) {
                         const ratio = Math.min(max / w, max / h);
                         w *= ratio; h *= ratio;
@@ -142,11 +142,11 @@
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     canvas.toBlob((blob) => {
-                        selectedFile = new File([blob], file.name, { type: 'image/png' });
-                        preview = canvas.toDataURL();
+                        selectedFile = new File([blob], file.name, { type: 'image/jpeg' });
+                        preview = canvas.toDataURL('image/jpeg', 0.7);
                         renderImage();
                         document.getElementById('generateBtn').disabled = !savedApiKey;
-                    }, 'image/png', 0.85);
+                    }, 'image/jpeg', 0.7);
                 };
                 img.src = evt.target.result;
             };
