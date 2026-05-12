@@ -21,6 +21,11 @@
         .apiStatus { color: #856404; font-size: 0.9rem; }
         .clearKeyBtn { display: block; margin-top: 0.5rem; padding: 6px 12px; background: #d97706; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
         .error { background: #fed7d7; border: 1px solid #fc8181; color: #c53030; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .focusBox { background: white; border: 2px solid #ec4899; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+        .focusBox h2 { font-size: 1rem; color: #be185d; margin-bottom: 0.5rem; }
+        .focusBox p { color: #831843; font-size: 0.9rem; margin-bottom: 0.75rem; }
+        .focusBox textarea { width: 100%; padding: 10px 12px; border: 1px solid #f9a8d4; border-radius: 6px; font-size: 0.9rem; font-family: inherit; resize: vertical; min-height: 60px; }
+        .focusBox textarea:focus { outline: none; border-color: #ec4899; }
         .mainGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
         .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .uploadBox { border: 3px dashed #cbd5e0; border-radius: 12px; padding: 3rem 2rem; text-align: center; cursor: pointer; background: #f7fafc; min-height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -70,6 +75,12 @@
             <h2>🔑 Setup</h2>
             <p>Get API key at <a href="https://console.anthropic.com/keys" target="_blank">console.anthropic.com/keys</a></p>
             <div id="apiSection"></div>
+        </div>
+
+        <div class="focusBox">
+            <h2>🎯 Focus areas (optional)</h2>
+            <p>Add keywords, themes, or details to emphasize. Examples: "summer cocktails," "Nantucket," "bachelorette party," "monogram," "Mom's birthday"</p>
+            <textarea id="focusInput" placeholder="e.g. tropical vacation, pink, beach club..."></textarea>
         </div>
 
         <div id="errorBox"></div>
@@ -187,16 +198,12 @@
         };
 
         window.exportCsv = function() {
-            // Build CSV content
             let csv = 'Name,Selected\n';
             names.forEach((name, i) => {
-                // Escape quotes in names
                 const escapedName = `"${name.replace(/"/g, '""')}"`;
                 const selected = selectedNames.has(i) ? 'Yes' : 'No';
                 csv += `${escapedName},${selected}\n`;
             });
-
-            // Create download
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -228,12 +235,14 @@
             selectedNames = new Set();
             renderResults();
 
+            const focusAreas = document.getElementById('focusInput').value.trim();
+
             try {
                 const base64 = await fileToBase64(selectedFile);
                 const res = await fetch('/api/claude', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ base64, apiKey: savedApiKey, seed: Math.random() })
+                    body: JSON.stringify({ base64, apiKey: savedApiKey, focusAreas, seed: Math.random() })
                 });
 
                 if (!res.ok) {
